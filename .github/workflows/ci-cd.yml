@@ -41,7 +41,7 @@ jobs:
       - name: Build Docker image
         run: |
           IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ github.sha }}
-          docker build -t $IMAGE_NAME .
+          docker build -f ./app/Dockerfile -t $IMAGE_NAME ./app
 
       # Push the Docker image to GAR
       - name: Push to GAR
