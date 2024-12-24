@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      # Install dependencies and run tests
+      # Install dependencies and run tests (optional)
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
@@ -32,28 +32,28 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      # Configure Docker to use GCR
-      - name: Configure Docker for GCR
+      # Configure Docker to use Artifact Registry
+      - name: Configure Docker for GAR
         run: |
-          gcloud auth configure-docker
+          gcloud auth configure-docker ${REGION}-docker.pkg.dev
 
       # Build and tag the Docker image
       - name: Build Docker image
         run: |
-          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT_ID }}/flask-app:${{ github.sha }}
-          docker build -f ./Dockerfile -t $IMAGE_NAME .
+          IMAGE_NAME=${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ github.sha }}
+          docker build -t $IMAGE_NAME .
 
-      # Push the Docker image to GCR
-      - name: Push to GCR
+      # Push the Docker image to GAR
+      - name: Push to GAR
         run: |
-          IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT_ID }}/flask-app:${{ github.sha }}
+          IMAGE_NAME=${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ github.sha }}
           docker push $IMAGE_NAME
 
       # Deploy to Cloud Run (Optional)
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy flask-app \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/flask-app:${{ github.sha }} \
+            --image ${REGION}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ github.sha }} \
             --platform managed \
-            --region us-central1 \
+            --region ${REGION} \
             --allow-unauthenticated
