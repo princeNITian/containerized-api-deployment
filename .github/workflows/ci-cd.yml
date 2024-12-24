@@ -41,7 +41,7 @@ jobs:
       - name: Build Docker image
         run: |
           IMAGE_NAME=gcr.io/${{ secrets.GCP_PROJECT_ID }}/flask-app:${{ github.sha }}
-          docker build -t $IMAGE_NAME .
+          docker build -f ./Dockerfile -t $IMAGE_NAME .
 
       # Push the Docker image to GCR
       - name: Push to GCR
