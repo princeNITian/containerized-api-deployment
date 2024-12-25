@@ -52,12 +52,12 @@ jobs:
           ZONE="us-central1-a"
 
           # Check if the cluster exists
-          gcloud container clusters list --zone $ZONE --project *** | grep -q $CLUSTER_NAME || \
+          gcloud container clusters list --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} | grep -q $CLUSTER_NAME || \
           (echo "Cluster does not exist. Creating cluster..." && \
           gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} --disk-type=pd-standard --num-nodes=3 --enable-ip-alias)
 
           # Get the credentials for the correct GKE cluster
-          gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project ***
+          gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }}
 
           # Check if the deployment exists, create it if necessary
           kubectl get deployment my-deployment || \
