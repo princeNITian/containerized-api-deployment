@@ -34,7 +34,7 @@ jobs:
       - name: Get the latest image tag from GAR
         id: get_image_tag
         run: |
-          IMAGE_NAME="us-central1-docker.pkg.dev/my-project/my-repo/my-app"
+          IMAGE_NAME="us-central1-docker.pkg.dev/my-project/my-repo/flask-app"
           # If you want to fetch the most recent image, you'll need to query your GAR registry for the latest tag.
           # For now, assuming the tag is static (replace this with dynamic fetching logic if necessary)
           IMAGE_TAG="latest"  # Update with dynamic tag if required
