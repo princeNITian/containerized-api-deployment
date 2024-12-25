@@ -43,8 +43,8 @@ jobs:
           echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
       # Deploy the image to GKE
-      - name: Deploy to GKE
-        run: |
+     - name: Deploy to GKE
+       run: |
           IMAGE_URI=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:latest
 
           # Create Cluster if it doesn't exist
@@ -62,7 +62,7 @@ jobs:
           # Ensure the deployment exists, create it if necessary
           kubectl get deployments my-deployment || \
           (echo "Deployment not found. Creating deployment..." && \
-          kubectl create deployment my-deployment --image=$IMAGE_URI)
+          kubectl create deployment my-deployment --image=$IMAGE_URI --dry-run=client -o yaml | kubectl set container my-deployment my-container --image=$IMAGE_URI)
 
           # Update the Kubernetes deployment to use the new image
           kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
