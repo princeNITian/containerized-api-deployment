@@ -23,8 +23,8 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          export_default_credentials: true
+          skip_install: false
+          version: latest
 
       - name: Pull Docker image from GAR
         run: |
@@ -49,9 +49,12 @@ jobs:
       - name: Deploy to GCE
         run: |
           IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:$MOST_RECENT_TAG
-          gcloud compute instances create-with-container gce-flask-app \
+          gcloud compute instances create gce-flask-app \
             --zone=us-central1-a \
             --machine-type=e2-medium \
             --container-image=$IMAGE_NAME \
             --tags=http-server,https-server \
-            --restart-on-failure
+            --restart-on-failure \
+            --metadata=startup-script='#!/bin/bash
+            # Optional: Install additional dependencies or perform configuration here
+            echo "Starting Docker container on GCE instance"'
