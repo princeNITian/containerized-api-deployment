@@ -43,22 +43,16 @@ jobs:
           echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
       # Deploy the image to GKE
-      # - name: Deploy to GKE
-      #   run: |
-      #     IMAGE_URI=${{ env.IMAGE }}
-
-      #     # Get the credentials for the GKE cluster
-      #     gcloud container clusters get-credentials my-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
-
-      #     # Update the Kubernetes deployment to use the new image
-      #     kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
-
-      #     # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
-      #     # kubectl apply -f kubernetes/deployment.yaml
-
       - name: Deploy to GKE
         run: |
           IMAGE_URI=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:latest
+
+          # Create Cluster if it doesn't exist
+          CLUSTER_NAME="prod-cluster"
+          ZONE="us-central1-a"
+          gcloud container clusters list --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} | grep -q $CLUSTER_NAME || \
+          (echo "Cluster does not exist. Creating cluster..." && \
+           gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }})
 
           # Get the credentials for the correct GKE cluster
           gcloud container clusters get-credentials prod-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
