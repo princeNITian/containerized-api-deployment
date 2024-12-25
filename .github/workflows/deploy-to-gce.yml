@@ -23,7 +23,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          install_components: 'beta' # Optional: Install additional components if needed
+          install_components: "beta" # Optional: Install additional components if needed
 
       # Configure Docker to authenticate with Google Cloud
       - name: Configure Docker to use Artifact Registry
@@ -40,7 +40,8 @@ jobs:
           MOST_RECENT_TAG=$(gcloud artifacts docker images list $IMAGE_NAME \
             --sort-by="~timestamp.datetime" \
             --limit=1 \
-            --format="value(tags[0])")
+            --format="value(tags[0])" \
+            --verbosity=debug 2>&1)
 
           # Check if a tag is found
           if [ -z "$MOST_RECENT_TAG" ]; then
