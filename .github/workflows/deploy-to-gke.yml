@@ -52,7 +52,7 @@ jobs:
           ZONE="us-central1-a"
           gcloud container clusters list --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} | grep -q $CLUSTER_NAME || \
           (echo "Cluster does not exist. Creating cluster..." && \
-           gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID --disk-type=pd-standard }})
+           gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} --disk-type=pd-standard)
 
           # Get the credentials for the correct GKE cluster
           gcloud container clusters get-credentials prod-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
