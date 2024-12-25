@@ -23,7 +23,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          install_components: "kubectl"  # Install kubectl to interact with GKE
+          install_components: "kubectl" # Install kubectl to interact with GKE
 
       # Configure Docker to authenticate with Artifact Registry
       - name: Configure Docker to use Artifact Registry
@@ -35,24 +35,36 @@ jobs:
         id: pull_image
         run: |
           IMAGE_NAME="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app"
-          
+
           # Assuming the tag is static for now (latest)
           IMAGE_TAG="latest"
-          
+
           # Set the image URI and pass it using environment variables
           echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
       # Deploy the image to GKE
+      # - name: Deploy to GKE
+      #   run: |
+      #     IMAGE_URI=${{ env.IMAGE }}
+
+      #     # Get the credentials for the GKE cluster
+      #     gcloud container clusters get-credentials my-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
+
+      #     # Update the Kubernetes deployment to use the new image
+      #     kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
+
+      #     # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
+      #     # kubectl apply -f kubernetes/deployment.yaml
+
       - name: Deploy to GKE
         run: |
-          IMAGE_URI=${{ env.IMAGE }}
-          
-          # Get the credentials for the GKE cluster
-          gcloud container clusters get-credentials my-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
-          
+          IMAGE_URI=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:latest
+
+          # Get the credentials for the correct GKE cluster
+          gcloud container clusters get-credentials production-cluster --zone us-west1-b --project ${{ secrets.GCP_PROJECT_ID }}
+
           # Update the Kubernetes deployment to use the new image
           kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
 
           # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
           # kubectl apply -f kubernetes/deployment.yaml
-
