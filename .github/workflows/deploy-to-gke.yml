@@ -56,17 +56,3 @@ jobs:
           # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
           # kubectl apply -f kubernetes/deployment.yaml
 
-
-      # - name: Deploy to GKE
-      #   run: |
-      #     IMAGE_URI=us-central1-docker.pkg.dev/my-project/my-repo/my-app:latest
-          
-      #     # Get the credentials for the correct GKE cluster
-      #     gcloud container clusters get-credentials production-cluster --zone us-west1-b --project ${{ secrets.GCP_PROJECT_ID }}
-          
-      #     # Update the Kubernetes deployment to use the new image
-      #     kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
-
-      #     # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
-      #     # kubectl apply -f kubernetes/deployment.yaml
-  ```
