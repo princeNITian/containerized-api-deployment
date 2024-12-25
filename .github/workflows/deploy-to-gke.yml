@@ -59,10 +59,10 @@ jobs:
           # Get the credentials for the correct GKE cluster
           gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }}
 
-          # Ensure the deployment exists, create it if necessary
-          kubectl get deployments my-deployment || \
+          # Check if the deployment exists, create it if necessary
+          kubectl get deployment my-deployment || \
           (echo "Deployment not found. Creating deployment..." && \
-          kubectl create deployment my-deployment --image=$IMAGE_URI --dry-run=client -o yaml | kubectl set container my-deployment my-container --image=$IMAGE_URI)
+          kubectl create deployment my-deployment --image=$IMAGE_URI)
 
           # Update the Kubernetes deployment to use the new image
           kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
