@@ -29,13 +29,18 @@ jobs:
       # Pull the image from Google Artifact Registry
       - name: Pull Docker image from GAR
         run: |
-          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:latest
+          MOST_RECENT_TAG=$(gcloud artifacts docker images list $IMAGE_NAME \
+            --filter="timestamp.datetime >= '1970-01-01T00:00:00Z'" \
+            --sort-by="~timestamp.datetime" \
+            --limit=1 \
+            --format="value(tags[0])")
+          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:$MOST_RECENT_TAG
           docker pull $IMAGE_NAME
 
       # Deploy the image to GCE
       - name: Deploy to GCE
         run: |
-          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:latest
+          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:$MOST_RECENT_TAG
           gcloud compute instances create-with-container gce-flask-app \
             --zone=us-central1-a \
             --machine-type=e2-medium \
