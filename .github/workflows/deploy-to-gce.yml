@@ -37,26 +37,13 @@ jobs:
           IMAGE_NAME=us-central1-docker.pkg.dev/containerized-api-deployment/my-repo/flask-app
 
           # List all images, filter by timestamp, sort by the most recent, and get the most recent tag
-          MOST_RECENT_TAG=$(gcloud artifacts docker images list $IMAGE_NAME \
-            --sort-by="~timestamp.datetime" \
-            --limit=1 \
-            --format="value(tags[0])" \
-            --verbosity=debug 2>&1)
-
-          # Check if a tag is found
-          if [ -z "$MOST_RECENT_TAG" ]; then
-            echo "No images found for the repository."
-            exit 1
-          else
-            echo "Pulling image with tag: $MOST_RECENT_TAG"
-            docker pull $IMAGE_NAME:$MOST_RECENT_TAG
-            echo "most_recent_tag=$MOST_RECENT_TAG" >> $GITHUB_ENV
-          fi
+          MOST_RECENT_TAG=9d788deca9ed7b09c7105a321f6c4c844352c519
+          docker pull $IMAGE_NAME:$MOST_RECENT_TAG
 
       # Deploy the image to GCE
       - name: Deploy to GCE
         run: |
-          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ env.most_recent_tag }}
+          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:9d788deca9ed7b09c7105a321f6c4c844352c519
           gcloud compute instances create-with-container gce-flask-app \
             --zone=us-central1-a \
             --machine-type=e2-medium \
