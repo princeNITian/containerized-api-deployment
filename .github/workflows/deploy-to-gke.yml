@@ -34,7 +34,7 @@ jobs:
       - name: Pull the latest Docker image from GAR
         id: pull_image
         run: |
-          IMAGE_NAME="us-central1-docker.pkg.dev/containerized-api-deployment/my-repo/flask-app"
+          IMAGE_NAME="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app"
           
           # Assuming the tag is static for now (latest)
           IMAGE_TAG="latest"
