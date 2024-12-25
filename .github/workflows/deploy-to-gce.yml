@@ -33,6 +33,7 @@ jobs:
 
       # List and get the most recent image tag from Artifact Registry
       - name: Pull the latest Docker image from GAR
+        id: pull_image
         run: |
           IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app
 
@@ -49,12 +50,13 @@ jobs:
           else
             echo "Pulling image with tag: $MOST_RECENT_TAG"
             docker pull $IMAGE_NAME:$MOST_RECENT_TAG
+            echo "most_recent_tag=$MOST_RECENT_TAG" >> $GITHUB_ENV
           fi
 
       # Deploy the image to GCE
       - name: Deploy to GCE
         run: |
-          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:$MOST_RECENT_TAG
+          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ env.most_recent_tag }}
           gcloud compute instances create-with-container gce-flask-app \
             --zone=us-central1-a \
             --machine-type=e2-medium \
