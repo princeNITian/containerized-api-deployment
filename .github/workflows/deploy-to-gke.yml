@@ -50,12 +50,19 @@ jobs:
           # Create Cluster if it doesn't exist
           CLUSTER_NAME="prod-cluster"
           ZONE="us-central1-a"
+
+          # Check if the cluster exists
           gcloud container clusters list --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} | grep -q $CLUSTER_NAME || \
           (echo "Cluster does not exist. Creating cluster..." && \
-           gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} --disk-type=pd-standard)
+          gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} --disk-type=pd-standard --num-nodes=3 --enable-ip-alias)
 
           # Get the credentials for the correct GKE cluster
-          gcloud container clusters get-credentials prod-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
+          gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }}
+
+          # Ensure the deployment exists, create it if necessary
+          kubectl get deployments my-deployment || \
+          (echo "Deployment not found. Creating deployment..." && \
+          kubectl create deployment my-deployment --image=$IMAGE_URI)
 
           # Update the Kubernetes deployment to use the new image
           kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
