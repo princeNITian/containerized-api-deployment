@@ -1,0 +1,44 @@
+name: Deploy to GCE
+
+on:
+  workflow_dispatch: # Enables manual trigger for deployment
+
+jobs:
+  deploy-to-gce:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository (optional if configuration files are in the repo)
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Authenticate with Google Cloud
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # Set up gcloud CLI
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      # Pull the image from Google Artifact Registry
+      - name: Pull Docker image from GAR
+        run: |
+          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ github.sha }}
+          docker pull $IMAGE_NAME
+
+      # Deploy the image to GCE
+      - name: Deploy to GCE
+        run: |
+          IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:${{ github.sha }}
+          gcloud compute instances create-with-container gce-flask-app \
+            --zone=us-central1-a \
+            --machine-type=e2-medium \
+            --container-image=$IMAGE_NAME \
+            --tags=http-server,https-server \
+            --restart-on-failure
