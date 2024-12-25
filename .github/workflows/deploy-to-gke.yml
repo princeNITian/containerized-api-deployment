@@ -1,18 +1,18 @@
 name: Deploy to GKE
 
 on:
-  workflow_dispatch: # Manually triggered deployment
+  workflow_dispatch: # Enables manual trigger for deployment
 
 jobs:
   deploy-to-gke:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository (optional, in case you have Kubernetes manifests in the repo)
+      # Checkout the repository (optional if configuration files are in the repo)
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Authenticate to Google Cloud
+      # Authenticate with Google Cloud
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v1
         with:
@@ -23,34 +23,35 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          install_components: "kubectl" # Install kubectl for Kubernetes access
+          install_components: "kubectl"  # Install kubectl to interact with GKE
 
       # Configure Docker to authenticate with Artifact Registry
       - name: Configure Docker to use Artifact Registry
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      # Get the most recent image tag from GAR (if dynamic)
-      - name: Get the latest image tag from GAR
-        id: get_image_tag
+      # List and get the most recent image tag from Artifact Registry
+      - name: Pull the latest Docker image from GAR
+        id: pull_image
         run: |
-          IMAGE_NAME="us-central1-docker.pkg.dev/my-project/my-repo/flask-app"
-          # If you want to fetch the most recent image, you'll need to query your GAR registry for the latest tag.
-          # For now, assuming the tag is static (replace this with dynamic fetching logic if necessary)
-          IMAGE_TAG="latest"  # Update with dynamic tag if required
-
-          echo "::set-output name=image::$IMAGE_NAME:$IMAGE_TAG"
+          IMAGE_NAME="us-central1-docker.pkg.dev/my-project/my-repo/my-app"
+          
+          # Assuming the tag is static for now (latest)
+          IMAGE_TAG="latest"
+          
+          # Set the image URI and pass it using environment variables
+          echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
       # Deploy the image to GKE
       - name: Deploy to GKE
         run: |
-          IMAGE_URI=${{ steps.get_image_tag.outputs.image }}
-
-          # Set the GKE cluster context
+          IMAGE_URI=${{ env.IMAGE }}
+          
+          # Get the credentials for the GKE cluster
           gcloud container clusters get-credentials my-cluster --zone us-central1-a --project ${{ secrets.GCP_PROJECT_ID }}
-
-          # Deploy the Docker image to GKE (using Kubernetes manifests or Helm)
+          
+          # Update the Kubernetes deployment to use the new image
           kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
 
-          # Alternatively, you can apply a Kubernetes manifest that defines the deployment:
+          # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
           # kubectl apply -f kubernetes/deployment.yaml
