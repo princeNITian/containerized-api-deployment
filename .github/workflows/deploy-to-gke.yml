@@ -37,7 +37,7 @@ jobs:
           IMAGE_NAME="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app"
 
           # Assuming the tag is static for now (latest)
-          IMAGE_TAG="latest"
+          IMAGE_TAG="9d788deca9ed7b09c7105a321f6c4c844352c519"
 
           # Set the image URI and pass it using environment variables
           echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
@@ -45,7 +45,7 @@ jobs:
       # Deploy the image to GKE
       - name: Deploy to GKE
         run: |
-          IMAGE_URI=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:latest
+          IMAGE_URI=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:9d788deca9ed7b09c7105a321f6c4c844352c519
 
           # Create Cluster if it doesn't exist
           CLUSTER_NAME="prod-cluster"
