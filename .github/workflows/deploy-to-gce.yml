@@ -31,9 +31,9 @@ jobs:
           # Define the Artifact Registry image name
           IMAGE_NAME=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app
 
-          # List all images, filter by timestamp, sort by the most recent, and get the most recent tag
+          # List all images, sort by the most recent, and get the most recent tag
           MOST_RECENT_TAG=$(gcloud artifacts docker images list $IMAGE_NAME \
-            --location=us-central1 \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
             --sort-by="~timestamp.datetime" \
             --limit=1 \
             --format="value(tags[0])")
