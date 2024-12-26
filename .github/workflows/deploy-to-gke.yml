@@ -30,24 +30,21 @@ jobs:
         run: |
           gcloud auth configure-docker us-central1-docker.pkg.dev
 
-      # List and get the most recent image tag from Artifact Registry
-      - name: Pull the latest Docker image from GAR
-        id: pull_image
+      # Define the Docker image URI
+      - name: Set Docker image URI
+        id: set_image
         run: |
           IMAGE_NAME="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app"
-
-          # Assuming the tag is static for now (latest)
           IMAGE_TAG="9d788deca9ed7b09c7105a321f6c4c844352c519"
+          IMAGE_URI="$IMAGE_NAME:$IMAGE_TAG"
 
-          # Set the image URI and pass it using environment variables
-          echo "IMAGE=$IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
+          # Export the image URI for the next steps
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
       # Deploy the image to GKE
       - name: Deploy to GKE
         run: |
-          IMAGE_URI=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/my-repo/flask-app:9d788deca9ed7b09c7105a321f6c4c844352c519
-
-          # Create Cluster if it doesn't exist
+          # Define variables
           CLUSTER_NAME="prod-cluster"
           ZONE="us-central1-a"
 
@@ -56,7 +53,7 @@ jobs:
           (echo "Cluster does not exist. Creating cluster..." && \
           gcloud container clusters create $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }} --disk-type=pd-standard --num-nodes=3 --enable-ip-alias)
 
-          # Get the credentials for the correct GKE cluster
+          # Get credentials for the GKE cluster
           gcloud container clusters get-credentials $CLUSTER_NAME --zone $ZONE --project ${{ secrets.GCP_PROJECT_ID }}
 
           # Check if the deployment exists, create it if necessary
@@ -65,7 +62,4 @@ jobs:
           kubectl create deployment my-deployment --image=$IMAGE_URI)
 
           # Update the Kubernetes deployment to use the new image
-          kubectl set image deployment/my-deployment my-deployment=$IMAGE_URI
-
-          # Alternatively, you can apply a Kubernetes manifest to create or update the deployment
-          # kubectl apply -f kubernetes/deployment.yaml
+          kubectl set image deployment/my-deployment my-deployment=$IMAGE_URI --record
