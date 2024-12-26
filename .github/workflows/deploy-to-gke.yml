@@ -62,4 +62,4 @@ jobs:
           kubectl create deployment my-deployment --image=$IMAGE_URI)
 
           # Update the Kubernetes deployment to use the new image
-          kubectl set image deployment/my-deployment my-deployment=$IMAGE_URI --record
+          kubectl set image deployment/my-deployment my-container=$IMAGE_URI --record
